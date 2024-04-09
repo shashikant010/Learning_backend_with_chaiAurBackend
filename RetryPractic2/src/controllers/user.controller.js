@@ -2,6 +2,7 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 import {ApiError} from "../utils/ApiError.js"
 import { User } from "../models/user.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
+import {ApiResponse} from"../utils/ApiResponse.js"
 const registerUser = asyncHandler(async(req,res)=>{
   const {email,password,fullName,username}=req.body;
   console.log(email);
@@ -12,9 +13,9 @@ if([fullName,password,email,username].some((field)=>field?.trim()==="")){
 
 const existedUser=User.findOne({$or:[{username},{email}]})
 
-if(existedUser){
-  throw new ApiError(409,"User or email already exist")
-}
+// if(existedUser){
+//   throw new ApiError(409,"User or email already exist")
+// }
 
 const avatarLocalPath= req.files?.avatar[0]?.path;
 const CoverImgLocalPath=req.files?.coverImage[0]?.path;
@@ -30,7 +31,7 @@ if(!avatar){
   throw new ApiError(400,"avatar is required")
 }
 
-User.create({
+const user = await User.create({
   fullName,
   username:username.toLowerCase(),
   password,
@@ -39,6 +40,17 @@ User.create({
   coverImage:coverImage?.url || ""
 
 })
+
+const createdUser=User.findById(user._id).select("-password -refreshToken")
+
+if(!createdUser){
+  throw new ApiError(500,"something went wrong while creating the user");
+}
+
+return res.status(201).json(
+  new ApiResponse(200,"User created successfully")
+)
+
 
   res.send("ok")
 })
