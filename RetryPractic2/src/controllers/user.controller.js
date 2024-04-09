@@ -3,6 +3,22 @@ import {ApiError} from "../utils/ApiError.js"
 import { User } from "../models/user.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import {ApiResponse} from"../utils/ApiResponse.js"
+
+const generateAccessAndRefreshToken = async(userId)=>{
+  try {
+    const user = User.findById(userId);
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
+  
+    user.refreshToken=refreshToken;
+    user.save({validateBeforeSave:false})
+    return {accessToken,refreshToken}
+  } catch (error) {
+    throw new ApiError(500,"something went wrong while generting access and refresh token")
+  }
+ 
+}
+
 const registerUser = asyncHandler(async(req,res)=>{
   const {email,password,fullName,username}=req.body;
   console.log(email);
@@ -62,6 +78,27 @@ return res.status(201).json(
   res.send("ok")
 })
 
+const loginUser = asyncHandler(async(req,res)=>{
+  const {email,username}=req.body;
+  if(!username||!email){
+    throw new ApiError(400,"Email or password is required")
+  }
+
+  const user = await User.findOne({
+    $or:[{username},{email}]
+  })
+
+  if(!user){
+    throw new ApiError(404,"user not find")
+  }
+
+  const isPasswordValid=await user.isPasswordCorrect(password);
+
+  if(!isPasswordValid){
+    throw new ApiError(401,"password is wrong")
+  }
+})
+
 export {registerUser}
 
 
@@ -76,3 +113,13 @@ export {registerUser}
     8.check for user creation
     9.return res
     */
+
+
+   /*Steps to login user
+
+    1.get data from req body
+    2.validate the data(that username/email exists or not if exist check password)
+    3.if alright give access and refresh token to user
+    4.send cookie
+
+   */
