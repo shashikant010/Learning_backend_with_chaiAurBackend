@@ -6,14 +6,17 @@ import {ApiResponse} from"../utils/ApiResponse.js"
 
 const generateAccessAndRefreshToken = async(userId)=>{
   try {
-    const user = User.findById(userId);
-    const accessToken = await user.generateAccessToken();
-    const refreshToken = await user.generateRefreshToken();
+    console.log(userId)
+    const user = await User.findById(userId);
+    console.log(user._id)
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
   
     user.refreshToken=refreshToken;
     user.save({validateBeforeSave:false})
     return {accessToken,refreshToken}
   } catch (error) {
+    console.log(error)
     throw new ApiError(500,"something went wrong while generting access and refresh token")
   }
  
@@ -48,7 +51,7 @@ if(!avatarLocalPath){
 }
 
 const avatar= await uploadOnCloudinary(avatarLocalPath);
-const coverImage = await uploadOnCloudinary(CoverImgLocalPath);
+const coverImage = await uploadOnCloudinary(coverImgLocalPath);
 
 if(!avatar){
   throw new ApiError(400,"avatar is required")
@@ -78,8 +81,9 @@ return res.status(201).json(
 })
 
 const loginUser = asyncHandler(async(req,res)=>{
-  const {email,username}=req.body;
-  if(!username||!email){
+  const {email,username,password}=req.body;
+  console.log(email,username)
+  if(!username && !email){
     throw new ApiError(400,"Email or password is required")
   }
 
@@ -93,6 +97,7 @@ const loginUser = asyncHandler(async(req,res)=>{
 
   const isPasswordValid=await user.isPasswordCorrect(password);
 
+  
   if(!isPasswordValid){
     throw new ApiError(401,"password is wrong")
   }

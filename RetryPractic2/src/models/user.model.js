@@ -49,14 +49,21 @@ const userSchema=new Schema ({
 })
 
 
-userSchema.pre("save",function(next){
-    if(!this.isModified("password")) return next()
-    this.password=bcrypt.hash(this.password,10)
+userSchema.pre("save", async function (next) {
+    console.log(this.isModified("password"))
+    if(!this.isModified("password")){
+        console.log("saving something but password modified")
+        return next();} 
+
+    this.password = await bcrypt.hash(this.password, 10)
+    console.log("password hashed ", this.password)
+
     next()
 })
 
-userSchema.methods.isPasswordCorrect=async function(password){
-  return await  bcrypt.compare(password,this.password)
+userSchema.methods.isPasswordCorrect = async function(password){
+    console.log(password,this.password)
+    return await bcrypt.compare(password, this.password)
 }
 
 userSchema.methods.generateAccessToken= function(){
