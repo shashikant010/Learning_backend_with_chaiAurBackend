@@ -11,14 +11,21 @@ if([fullName,password,email,username].some((field)=>field?.trim()==="")){
   throw new ApiError(400,"all fields are required")
 }
 
-const existedUser=User.findOne({$or:[{username},{email}]})
+const existedUser= await User.findOne({
+  $or:[{username},{email}]
+})
+console.log(existedUser)
 
-// if(existedUser){
-//   throw new ApiError(409,"User or email already exist")
-// }
+if(existedUser){
+  throw new ApiError(409,"User or email already exist")
+}
 
 const avatarLocalPath= req.files?.avatar[0]?.path;
-const CoverImgLocalPath=req.files?.coverImage[0]?.path;
+// const CoverImgLocalPath=req.files?.coverImage[0]?.path; not working properly
+let coverImgLocalPath;
+if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length>0){
+  coverImgLocalPath=req.files.coverImage[0].path;
+}
 
 if(!avatarLocalPath){
   throw new ApiError(400,"avatar is required")
