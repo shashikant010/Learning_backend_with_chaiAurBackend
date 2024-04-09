@@ -75,7 +75,6 @@ return res.status(201).json(
 )
 
 
-  res.send("ok")
 })
 
 const loginUser = asyncHandler(async(req,res)=>{
@@ -97,9 +96,48 @@ const loginUser = asyncHandler(async(req,res)=>{
   if(!isPasswordValid){
     throw new ApiError(401,"password is wrong")
   }
+
+  const {refreshToken,accessToken}=await generateAccessAndRefreshToken(user._id);
+
+  const loggedinUser=await User.findById(user._id).select("-password -refreshToken");
+
+  const options = {
+    httpOnly:true,
+    secure:true
+  }
+
+  return res
+  .status(201)
+  .cookie("accessToken",accessToken,options)
+  .cookie("refreshToken",refreshToken,options)
+  .json(new ApiResponse(200,{user:loggedinUser,accessToken,refreshToken},"user logged in successfully"))
+
 })
 
-export {registerUser}
+const logoutUser=asyncHandler(async(req,res)=>{
+    await User.findByIdAndUpdate(req.user._id,{
+      $set:{
+        refreshToken:undefined
+      }
+    ,}
+    ,{
+      new:true
+    })
+
+    const options = {
+      httpOnly:true,
+      secure:true
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accessToken")
+    .clearCookie("refreshToken")
+    .json(new ApiResponse(200,{},"loggedout successfully"))
+
+})
+
+export {registerUser,loginUser,logoutUser}
 
 
   /*steps to register a user
