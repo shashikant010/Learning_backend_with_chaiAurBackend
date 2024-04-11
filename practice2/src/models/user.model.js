@@ -31,7 +31,6 @@ const userSchema = new Schema(
         },
         coverImg:{
             type:String,  //cloudinary service url
-            require:true,
         },
         watchHistory:[{
             type:Schema.Types.ObjectId,
@@ -68,9 +67,9 @@ userSchema.methods.generateAccessToken=function(){
             userName:this.userName,
             fullName:this.fullName
         },
-        process.env.ACCESS_TOKEN_SECRET,
+        "SKYISAGOODBOY",
         {
-        expiresIn:process.env.ACCESS_TOKEN_EXPIRY
+        expiresIn:"1d"
         }
     )
 }
@@ -80,9 +79,9 @@ userSchema.methods.generateRefreshToken=function(){
         {
             _id:this._id,
         },
-        process.env.REFRESH_TOKEN_SECRET,
+        "SKYISANICEBOY",
         {
-        expiresIn:process.env.REFRESH_TOKEN_EXPIRY
+        expiresIn:"10d"
         }
     )
 }

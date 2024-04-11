@@ -5,10 +5,7 @@ import {User} from "../models/user.model.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 const registerUser=asynchandler(
 async(req,res)=>{
-    //(for temporary testing)
-//     res.status(200).json({
-//         message:"ok"
-//     })
+   
 const {userName,password,email,fullName}=req.body
 console.log(email)
 
@@ -18,16 +15,25 @@ if([userName,password,email,fullName].some((field)=>{
     throw new ApiError(400,"All fields are required")
 }
 
-const existedUser=User.findOne({
+console.log("all fields are right and given")
+
+const existedUser=await User.findOne({
     $or:[{userName},{email}]
 })
+
+
 
 if(existedUser){
     throw new ApiError(409,"Username or email already exists")
 }
+console.log("no user with same username or email exists")
 
-const avatarLocalPath = req.files?.avatar[0]?.path;
-const coverImgLocalPath = req.files?.CoverImg[0]?.path;
+console.log(req.files.avatar[0].path)
+console.log(req.files.coverImg[0].path)
+
+const avatarLocalPath = req.files?.avatar[0].path
+const coverImgLocalPath = req.files?.coverImg[0]?.path
+
 
 if(!avatarLocalPath){
     throw new ApiError(400,"avatar is required")
@@ -35,10 +41,11 @@ if(!avatarLocalPath){
 
 const avatar = await  uploadOnCloudinary(avatarLocalPath);
 const coverImage=await uploadOnCloudinary(coverImgLocalPath);
-
 if(!avatar){
     throw new ApiError(400,"avatar is required")
 }
+console.log("images are uploaded succeefully")
+
 
 const user = await User.create({
 userName:userName.toLowerCase(),
@@ -50,14 +57,24 @@ coverImage: coverImage?.url || ""
 
 })
 
-const createdUser= User.findById(user._id).select("-password -refreshToken")
+console.log("user is created successfully",user)
+
+// const createdUser= User.findById(user._id).select("-password -refreshToken")
+
+if(createdUser){
+    Console.log("user added successfully on database")
+}
 
 
+// return res.status(201).json(
+//     new ApiResponse(200,createdUser,"user registered successfully")
+// )
 
 
-return res.status(201).json(
-    new ApiResponse(200,createdUser,"user registered successfully")
-)
+//  (for temporary testing)
+ res.status(200).json({
+    message:"ok"
+})
 
 }
 
