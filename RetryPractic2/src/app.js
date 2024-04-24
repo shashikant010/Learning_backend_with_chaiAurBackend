@@ -16,6 +16,11 @@ app.use(cookieParser())
 //routes
 import userRouter from "./routes/user.routes.js"
 
+app.get("/",(req,res)=>{
+    res.json({
+        sky:"is a hacker"
+    })
+})
 
 //route declaration
 app.use("/api/v1/user",userRouter)
