@@ -4,23 +4,19 @@ Will Write notes for complete backend here.
 
 
 import mongoose , {Schema} from "mongoose";
-import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"; (only for that page in which pagenation is required)
 
-const commentSchema = new Schema({
-    content:{
+const SchemaName = new Schema({
+    value:{
         type:String,
         required:true
     },
-    video:{
+    value2:{
         type:Schema.Types.ObjectId,
-        ref:"Video"
-    },
-    owner:{
-        type:Schema.Types.ObjectId,
-        ref:"User"
+        ref:"other model name"
     }
 },{timestamps:true})
 
-commentSchema.plugin(mongooseAggregatePaginate)
 
-export const Comment = mongoose.model("Comment",commentSchema)
+
+export const modelName = mongoose.model("modelName",SchemaName)
