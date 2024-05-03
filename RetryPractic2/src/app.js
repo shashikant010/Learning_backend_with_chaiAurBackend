@@ -25,8 +25,4 @@ app.get("/",(req,res)=>{
 //route declaration
 app.use("/api/v1/user",userRouter)
 
-app.post("/user",(req,res)=>{
-    res.send("ok")
-})
-
 export {app}
